@@ -9,7 +9,6 @@
       text-align: center;
       margin-top: 60px;
       background: linear-gradient(135deg, #89f7fe, #66a6ff);
-      animation: fadeIn 1.5s ease;
       color: #fff;
     }
     h1 { animation: bounceIn 1s ease; }
@@ -33,11 +32,8 @@
       border-radius: 8px;
       margin-top: 30px;
     }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes bounceIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     @media (max-width: 600px) {
-      body { margin-top: 30px; font-size: 16px; }
-      h1 { font-size: 20px; }
       button { width: 80%; font-size: 16px; padding: 12px 20px; margin: 10px auto; display: block; }
       #noBtn { position: relative; margin: 15px auto; }
     }
@@ -71,18 +67,18 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
   <script>
-    // Configuración de tu proyecto Firebase (copia la tuya desde Firebase Console)
+    // Configuración de tu proyecto Firebase
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_PROJECT_ID.firebaseapp.com",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_PROJECT_ID.appspot.com",
-      messagingSenderId: "TU_SENDER_ID",
-      appId: "TU_APP_ID"
+      apiKey: "AIzaSyDYlHoHAdVBENkYGXKPVOKE9Stl44H0OaM",
+      authDomain: "invitacion-fb6eb.firebaseapp.com",
+      projectId: "invitacion-fb6eb",
+      storageBucket: "invitacion-fb6eb.firebasestorage.app",
+      messagingSenderId: "390082442274",
+      appId: "1:390082442274:web:ad4790388067623a73867b"
     };
 
     // Inicializar Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     const siBtn = document.getElementById("siBtn");
@@ -135,8 +131,7 @@
         let datos = "";
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          datos += "Respuesta: " + data.respuesta + 
-                   " | Cita: " + data.cita + "\n";
+          datos += "Respuesta: " + data.respuesta + " | Cita: " + data.cita + "\n";
         });
         alert(datos);
       });
