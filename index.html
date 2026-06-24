@@ -77,18 +77,8 @@
     appId: "1:390082442274:web:ad4790388067623a73867b"
   };
 
-  let db = null;
-  let firebaseReady = false;
-
-  try {
-    if (window.firebase) {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      firebaseReady = true;
-    }
-  } catch (error) {
-    console.warn("Firebase no disponible, se usará almacenamiento local:", error);
-  }
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
   const siBtn = document.getElementById("siBtn");
   const noBtn = document.getElementById("noBtn");
@@ -96,66 +86,29 @@
   let size = 18;
   let colorIntensity = 76;
 
-  function guardarLocal(opcion) {
-    const respuestas = JSON.parse(localStorage.getItem("respuestasInvitacion") || "[]");
-    respuestas.push({
-      respuesta: "Sí",
-      cita: opcion,
-      timestamp: new Date().toISOString()
-    });
-    localStorage.setItem("respuestasInvitacion", JSON.stringify(respuestas));
-    return respuestas;
-  }
-
-  async function mostrarFinal(opcion) {
+  function mostrarFinal(opcion) {
     document.getElementById("vista2").classList.add("hidden");
     document.getElementById("vista3").classList.remove("hidden");
+    respuesta.innerText = "Elegiste: " + opcion;
 
-    try {
-      if (firebaseReady && db) {
-        await db.collection("respuestas").add({
-          respuesta: "Sí",
-          cita: opcion,
-          timestamp: new Date()
-        });
-        respuesta.innerText = "Elegiste: " + opcion + " · guardada en Firebase";
-        return;
-      }
-    } catch (error) {
-      console.warn("No se pudo guardar en Firebase, se usará almacenamiento local:", error);
-    }
-
-    guardarLocal(opcion);
-    respuesta.innerText = "Elegiste: " + opcion + " · guardada localmente";
+    db.collection("respuestas").add({
+      respuesta: "Sí",
+      cita: opcion,
+      timestamp: new Date()
+    })
+    .then(() => console.log("Respuesta guardada en Firebase"))
+    .catch((error) => console.error("Error al guardar: ", error));
   }
 
-  async function verRespuestas() {
-    let datos = "";
-
-    if (firebaseReady && db) {
-      try {
-        const querySnapshot = await db.collection("respuestas").get();
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          datos += "Respuesta: " + data.respuesta + " | Cita: " + data.cita + "\n";
-        });
-      } catch (error) {
-        console.warn("No se pudo leer Firebase, se mostrará almacenamiento local:", error);
-      }
-    }
-
-    const locales = JSON.parse(localStorage.getItem("respuestasInvitacion") || "[]");
-    if (locales.length) {
-      locales.forEach((item) => {
-        datos += "Respuesta: " + item.respuesta + " | Cita: " + item.cita + "\n";
+  function verRespuestas() {
+    db.collection("respuestas").get().then((querySnapshot) => {
+      let datos = "";
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        datos += "Respuesta: " + data.respuesta + " | Cita: " + data.cita + "\n";
       });
-    }
-
-    if (!datos) {
-      datos = "No hay respuestas guardadas todavía.";
-    }
-
-    alert(datos);
+      alert(datos);
+    });
   }
 
   siBtn.addEventListener("click", () => {
