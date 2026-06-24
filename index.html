@@ -8,13 +8,11 @@
       font-family: 'Segoe UI', sans-serif;
       text-align: center;
       margin-top: 60px;
-      background: linear-gradient(135deg, #89f7fe, #66a6ff); /* degradado azul-violeta */
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
       animation: fadeIn 1.5s ease;
       color: #fff;
     }
-    h1 {
-      animation: bounceIn 1s ease;
-    }
+    h1 { animation: bounceIn 1s ease; }
     button {
       padding: 15px 30px;
       font-size: 18px;
@@ -24,29 +22,9 @@
       border-radius: 10px;
       transition: all 0.3s ease;
     }
-    #siBtn {
-      background-color: #4CAF50;
-      color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
-    #noBtn {
-      background-color: #f44336;
-      color: white;
-      position: absolute;
-    }
+    #siBtn { background-color: #4CAF50; color: white; }
+    #noBtn { background-color: #f44336; color: white; position: absolute; }
     .hidden { display: none; }
-
-    /* Animaciones */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes bounceIn {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    /* Botón secreto */
     #verBtn {
       background-color: #222;
       color: #fff;
@@ -55,27 +33,13 @@
       border-radius: 8px;
       margin-top: 30px;
     }
-
-    /* Responsividad para pantallas pequeñas */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes bounceIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     @media (max-width: 600px) {
-      body {
-        margin-top: 30px;
-        font-size: 16px;
-      }
-      h1 {
-        font-size: 20px;
-      }
-      button {
-        width: 80%;
-        font-size: 16px;
-        padding: 12px 20px;
-        margin: 10px auto;
-        display: block;
-      }
-      #noBtn {
-        position: relative; /* en móvil mejor que no se mueva demasiado */
-        margin: 15px auto;
-      }
+      body { margin-top: 30px; font-size: 16px; }
+      h1 { font-size: 20px; }
+      button { width: 80%; font-size: 16px; padding: 12px 20px; margin: 10px auto; display: block; }
+      #noBtn { position: relative; margin: 15px auto; }
     }
   </style>
 </head>
@@ -91,63 +55,93 @@
   <!-- Vista 2 -->
   <div id="vista2" class="hidden">
     <h1>Elige nuestra cita ✨</h1>
-    <button onclick="mostrarFinal('Golf')">Al mínimo golf ⛳ </button>
-    <button onclick="mostrarFinal('Café')">Ir por un café ☕ </button>
+    <button onclick="mostrarFinal('Golf')">Al mínimo golf ⛳</button>
+    <button onclick="mostrarFinal('Café')">Ir por un café ☕</button>
   </div>
 
   <!-- Vista 3 -->
   <div id="vista3" class="hidden">
     <h1>Gracias por contestar 💖</h1>
     <p id="respuesta"></p>
-    <!-- Botón secreto solo para ti -->
     <button id="verBtn" onclick="verRespuestas()">Ver respuestas guardadas</button>
   </div>
 
-<script>
-  const siBtn = document.getElementById("siBtn");
-  const noBtn = document.getElementById("noBtn");
-  let size = 18;
-  let colorIntensity = 76; // base verde
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
-  // Botón Sí: pasa a la siguiente vista
-  siBtn.addEventListener("click", () => {
-    document.getElementById("vista1").classList.add("hidden");
-    document.getElementById("vista2").classList.remove("hidden");
-    localStorage.setItem("respuesta", "Sí");
-  });
+  <script>
+    // Configuración de tu proyecto Firebase (copia la tuya desde Firebase Console)
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_PROJECT_ID.firebaseapp.com",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_PROJECT_ID.appspot.com",
+      messagingSenderId: "TU_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
 
-  // Botón No: se mueve y hace crecer el botón Sí
-  noBtn.addEventListener("mouseover", () => {
-    const x = Math.random() * (window.innerWidth - 150);
-    const y = Math.random() * (window.innerHeight - 100);
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+    // Inicializar Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    // Cada vez que intenta tocar "No", el botón Sí crece y brilla más
-    size += 4;
-    colorIntensity += 20;
-    siBtn.style.fontSize = size + "px";
-    siBtn.style.backgroundColor = `rgb(${colorIntensity}, 180, ${colorIntensity})`;
-    siBtn.style.boxShadow = `0 0 ${size/2}px rgba(0,255,0,0.6)`;
-  });
+    const siBtn = document.getElementById("siBtn");
+    const noBtn = document.getElementById("noBtn");
+    let size = 18;
+    let colorIntensity = 76;
 
-  // Mostrar vista final con costo
-  function mostrarFinal(opcion, costo) {
-    document.getElementById("vista2").classList.add("hidden");
-    document.getElementById("vista3").classList.remove("hidden");
-    document.getElementById("respuesta").innerText = "Elegiste: " + opcion + " (Costo: " + costo + ")";
-    localStorage.setItem("cita", opcion);
-    localStorage.setItem("costo", costo);
-  }
+    // Botón Sí: pasa a la siguiente vista
+    siBtn.addEventListener("click", () => {
+      document.getElementById("vista1").classList.add("hidden");
+      document.getElementById("vista2").classList.remove("hidden");
+    });
 
-  // Botón secreto para ver respuestas guardadas
-  function verRespuestas() {
-    const respuesta = localStorage.getItem("respuesta");
-    const cita = localStorage.getItem("cita");
-    const costo = localStorage.getItem("costo");
-    alert("Respuesta: " + respuesta + "\nCita: " + cita + "\nCosto: " + costo);
-  }
-</script>
+    // Botón No: se mueve y hace crecer el botón Sí
+    noBtn.addEventListener("mouseover", () => {
+      const x = Math.random() * (window.innerWidth - 150);
+      const y = Math.random() * (window.innerHeight - 100);
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+
+      size += 4;
+      colorIntensity += 20;
+      siBtn.style.fontSize = size + "px";
+      siBtn.style.backgroundColor = `rgb(${colorIntensity}, 180, ${colorIntensity})`;
+      siBtn.style.boxShadow = `0 0 ${size/2}px rgba(0,255,0,0.6)`;
+    });
+
+    // Guardar en Firebase
+    function mostrarFinal(opcion) {
+      document.getElementById("vista2").classList.add("hidden");
+      document.getElementById("vista3").classList.remove("hidden");
+      document.getElementById("respuesta").innerText = "Elegiste: " + opcion;
+
+      db.collection("respuestas").add({
+        respuesta: "Sí",
+        cita: opcion,
+        timestamp: new Date()
+      })
+      .then(() => {
+        console.log("Respuesta guardada en Firebase");
+      })
+      .catch((error) => {
+        console.error("Error al guardar: ", error);
+      });
+    }
+
+    // Botón secreto para ver respuestas guardadas
+    function verRespuestas() {
+      db.collection("respuestas").get().then((querySnapshot) => {
+        let datos = "";
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          datos += "Respuesta: " + data.respuesta + 
+                   " | Cita: " + data.cita + "\n";
+        });
+        alert(datos);
+      });
+    }
+  </script>
 
 </body>
 </html>
